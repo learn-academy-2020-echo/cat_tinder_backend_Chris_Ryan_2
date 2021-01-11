@@ -41,4 +41,37 @@ RSpec.describe "Cats", type: :request do
         expect(cat.name).to eq 'Buster'
       end
 
+      it "doesn't create a cat without a name" do
+        cat_params = {
+          cat: {
+            age: 2,
+            enjoys: 'Walks in the park'
+          }
+        }
+        # Send the request to the  server
+        post '/cats', params: cat_params
+        # expect an error if the cat_params does not have a name
+        expect(response.status).to eq 422
+        # Convert the JSON response into a Ruby Hash
+        json = JSON.parse(response.body)
+        # Errors are returned as an array because there could be more than one, if there are more than one validation failures on an attribute.
+        expect(json['name']).to include "can't be blank"
+      end
+
+      it "doesn't create a cat without an enjoys section of less than 10 characters" do
+        cat_params = {
+          cat: {
+            age: 2,
+            enjoys: 'Long walks in the park.'
+          }
+        }
+        # Send the request to the  server
+        post '/cats', params: cat_params
+        # expect an error if the cat_params does not have a name
+        expect(response.status).to eq 422
+        # Convert the JSON response into a Ruby Hash
+        json = JSON.parse(response.body)
+        # Errors are returned as an array because there could be more than one, if there are more than one validation failures on an attribute.
+        expect(json['enjoys']).to include 'Long walks in the park.'
+      end
 end
